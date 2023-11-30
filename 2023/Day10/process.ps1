@@ -20,7 +20,8 @@ begin {
   $InputFile = Resolve-Path (Join-Path $PSScriptRoot "input.txt")
 }
 process {
-    get-content $InputFile
+  get-content $InputFile
+
 }
 end {
 }
