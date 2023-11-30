@@ -15,28 +15,29 @@ begin {
 
   function Init-TextFile() {
     param($directory)
-    $textFilePath = join-path $directory "Placeholder.txt"
+    $textFilePath = join-path $directory "input.txt"
     if (!(Test-Path $textFilePath)) {
         log "Initializing $textFilePath"
-        "Placeholder text file" | Out-File -FilePath $textFilePath -Force
+        "Placeholder input text file" | Out-File -FilePath $textFilePath -Force
     }
   }
 }
 process {
     $YearPath = (Join-Path $PSScriptRoot $Year)
     if (!(Test-Path $YearPath)) {
-        log "Initializing $YearPath"
-        mkdir $YearPath
-        Init-TextFile -directory $YearPath
+      log "Initializing $YearPath"
+      mkdir $YearPath
     }
     1..25 | ForEach-Object {
-        $DayDirectory = Join-Path $YearPath ("Day{0}" -f $_.ToString("00"))
+      $DayDirectory = Join-Path $YearPath ("Day{0}" -f $_.ToString("00"))
 
-        if (!(Test-Path $DayDirectory)) {
-            log "Initializing $DayDirectory"
-            mkdir $DayDirectory
-            Init-TextFile -directory $DayDirectory
-        }
+      if (!(Test-Path $DayDirectory)) {
+          log "Initializing $DayDirectory"
+          mkdir $DayDirectory
+      }
+      Init-TextFile -directory $DayDirectory
+
+      Copy-Item "$PSScriptRoot\process.ps1" $DayDirectory
     }
 }
 end {
