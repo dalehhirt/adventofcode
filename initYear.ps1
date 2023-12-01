@@ -13,7 +13,7 @@ begin {
 
   #-----------------
   # Helper functions
-  Import-Module $PSScriptRoot\modules\AdventOfCode.Util -Force
+  Import-Module $PSScriptRoot\modules\AdventOfCode.Util -Force -verbose:$false
 
   function Init-TextFile() {
     param($directory, [switch]$Force)
