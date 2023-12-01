@@ -37,25 +37,75 @@ begin {
     write-error ">>> [$($env:COMPUTERNAME)] $((Get-Date).ToUniversalTime().ToString('u')) $args"
   }
 
-  function Get-NumberValue(){
+  function Get-TrueNumberValue() {
+    param($value)
+    if($numberHash.Contains($value)) {
+      return $numberHash[$value]
+    }
+    return $value
+  }
+
+  function Get-NumberValue2(){
+    param($line)
+    $originalLine = $line
+
+    $returnMatches = @()
+    while("" -ne $line) {
+      if($line[0] -match "\d") {
+        $returnMatches += $line[0]
+      }
+      else {
+        foreach ($key in $numberHash.Keys) {
+          if($line -match "^$key") {
+            $returnMatches += $key
+          }
+        }
+      }
+      $line = $line.Substring(1)
+    } 
+    
+    $returnString = (Get-TrueNumberValue $returnMatches[0]) + (Get-TrueNumberValue $returnMatches[-1])
+    # log "Matches found:" ($returnMatches -join ",")
+    # log "$originalLine -> $returnString"
+    [int]$returnString
+  }
+
+  function Get-NumberValue1(){
     param($line)
     
     $regex = "\d"
     $returnMatches = [regex]::Matches($line, $regex)
     $returnString = $returnMatches[0].Value + $returnMatches[-1].Value
+    #log "$line -> $returnString"
     [int]$returnString
   }
   #-----------------
   # Global Variables
   $InputFile = Resolve-Path (Join-Path $PSScriptRoot "input.txt")
   $SumOfCalibrationValues = 0
+  $numberHash = [ordered]@{"one"="1";
+    "two"="2";
+    "three"="3";
+    "four"="4";
+    "five"="5";
+    "six"="6";
+    "seven"="7";
+    "eight"="8";
+    "nine"="9"}
 }
 process {
   get-content $InputFile | ForEach-Object {
     $Line = $_
-    $SumOfCalibrationValues += Get-NumberValue $Line
+    $SumOfCalibrationValues += Get-NumberValue1 $Line
   }
-  log "Total Sum of all Calibration Values:" $SumOfCalibrationValues
+  log "1st Total Sum of all Calibration Values:" $SumOfCalibrationValues
+  
+  $SumOfCalibrationValues = 0
+  get-content $InputFile | ForEach-Object {
+    $Line = $_
+    $SumOfCalibrationValues += Get-NumberValue2 $Line
+  }
+  log "2nd Total Sum of all Calibration Values:" $SumOfCalibrationValues
 }
 end {
 }
