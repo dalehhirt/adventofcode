@@ -1,0 +1,12 @@
+﻿TOPIC
+	about_AdventOfCode.Util
+	
+SHORT DESCRIPTION
+	A short synopsis of AdventOfCode.Util
+
+LONG DESCRIPTION
+	A more detailed description of AdventOfCode.Util,
+	Should tell the user how to get started with this module.
+	
+KEYWORDS
+	module development debugging
