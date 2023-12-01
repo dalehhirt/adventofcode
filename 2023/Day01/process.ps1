@@ -107,11 +107,12 @@ begin {
 
   #-----------------
   # Helper functions
-  Import-Module $PSScriptRoot\..\..\modules\AdventOfCode.Util
+  Import-Module $PSScriptRoot\..\..\modules\AdventOfCode.Util -Force -verbose:$false
 
   #-----------------
   # Global Variables
   $InputFile = Resolve-Path (Join-Path $PSScriptRoot "input.txt")
+  log-verbose "Input file path: $InputFile"
   $numberHash = [ordered]@{"one"="1";
     "two"="2";
     "three"="3";
