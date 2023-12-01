@@ -57,25 +57,80 @@ begin {
     write-error ">>> [$($env:COMPUTERNAME)] $((Get-Date).ToUniversalTime().ToString('u')) $args"
   }
 
+  function Get-Part1Answer {
+    [CmdletBinding()]
+    param (
+      [Parameter(ValueFromPipeline=$true)]
+      [string[]]
+      $lines
+    )
+    
+    begin {
+      $returnValue = ""
+      $elves = @()
+      $calories = 0
+    }
+    
+    process {
+      foreach ($line in $lines) {
+        if($line -eq ""){
+          $elves += $calories
+          $calories = 0
+          return
+        }
+        $calories += [int]$line
+      }
+      $returnValue = ($elves | Sort-Object -Descending | Select-Object -first 1)
+    }
+    
+    end {
+      log "Total # of Elves:" $elves.Count
+      return $returnValue
+    }
+  }
+
+  function Get-Part2Answer {
+    [CmdletBinding()]
+    param (
+      [Parameter(ValueFromPipeline=$true)]
+      [string[]]
+      $lines
+    )
+    
+    begin {
+      $returnValue = ""
+      $elves = @()
+      $calories = 0
+    }
+    
+    process {
+      foreach ($line in $lines) {
+        if($line -eq ""){
+          $elves += $calories
+          $calories = 0
+          return
+        }
+        $calories += [int]$line
+      }
+      $returnValue = ($elves | Sort-Object -Descending | Select-Object -first 3 | measure-object -Sum).Sum
+    }
+    
+    end {
+      log "Total # of Elves:" $elves.Count
+      return $returnValue
+    }
+  }
+
+  #-----------------
+  # Global Variables
   $InputFile = Resolve-Path (Join-Path $PSScriptRoot "input.txt")
 }
 process {
-  $elves = @()
-  $calories = 0
-  get-content $InputFile | foreach {
-    $line = $_
-    if($line -eq ""){
-      $elves += $calories
-      $calories = 0
-      return
-    }
-    $calories += [int]$line
-  }
-  log "Total # of Elves:" $elves.Count
-  log "Biggest Calorie Count"
-  $elves | sort -Descending | Select-Object -first 1
-  log "Top Three Elves total calories"
-  ($elves | sort -Descending | Select-Object -first 3 | measure-object -Sum).Sum
+  $lines = get-content $InputFile
+
+  log "Part 1 Answer:" ($lines | Get-Part1Answer)
+
+  log "Part 2 Answer:" ($lines | Get-Part2Answer)
 }
 end {
 }
