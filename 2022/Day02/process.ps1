@@ -39,11 +39,13 @@ begin {
     )
     
     begin {
-      $returnValue = ""
+      $returnValue = 0
     }
     
     process {
       foreach ($line in $lines) {
+        $choices = -split $line
+        log-verbose "First Player $($choices[0]) <-> Second Player $($choices[1])"
       }
     }
     
@@ -76,11 +78,12 @@ begin {
 
   #-----------------
   # Helper functions
-  Import-Module $PSScriptRoot\..\..\modules\AdventOfCode.Util
+  Import-Module $PSScriptRoot\..\..\modules\AdventOfCode.Util -Force -verbose:$false
 
   #-----------------
   # Global Variables
   $InputFile = Resolve-Path (Join-Path $PSScriptRoot "input.txt")
+  log-verbose "Input file path: $InputFile"
 }
 process {
   $lines = get-content $InputFile
