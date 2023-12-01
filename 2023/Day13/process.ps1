@@ -17,6 +17,8 @@ begin {
     write-error ">>> [$($env:COMPUTERNAME)] $((Get-Date).ToUniversalTime().ToString('u')) $args"
   }
 
+  #-----------------
+  # Global Variables
   $InputFile = Resolve-Path (Join-Path $PSScriptRoot "input.txt")
 }
 process {
