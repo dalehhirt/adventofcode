@@ -6,7 +6,8 @@ This script runs.
 param(
     [Parameter(Mandatory=$true)]
     [int]
-    $Year
+    $Year,
+    [switch]$Force
 )
 begin {
   function log() {
@@ -14,9 +15,9 @@ begin {
   }
 
   function Init-TextFile() {
-    param($directory)
+    param($directory, [switch]$Force)
     $textFilePath = join-path $directory "input.txt"
-    if (!(Test-Path $textFilePath)) {
+    if (!(Test-Path $textFilePath) -or $Force) {
         log "Initializing $textFilePath"
         "Placeholder input text file" | Out-File -FilePath $textFilePath -Force
     }
@@ -35,7 +36,7 @@ process {
           log "Initializing $DayDirectory"
           mkdir $DayDirectory
       }
-      Init-TextFile -directory $DayDirectory
+      Init-TextFile -directory $DayDirectory -Force:$Force
 
       Copy-Item "$PSScriptRoot\process.ps1" $DayDirectory
     }
