@@ -44,45 +44,80 @@ begin {
     }
     return $value
   }
-
-  function Get-NumberValue2(){
-    param($line)
-    $originalLine = $line
-
-    $returnMatches = @()
-    while("" -ne $line) {
-      if($line[0] -match "\d") {
-        $returnMatches += $line[0]
+  function Get-Part1Answer {
+    [CmdletBinding()]
+    param (
+      [Parameter(ValueFromPipeline=$true)]
+      [string[]]
+      $lines
+    )
+    
+    begin {
+      $returnValue = 0
+      $regex = "\d"
+    }
+    
+    process {
+      foreach ($line in $lines) {
+        $returnMatches = [regex]::Matches($line, $regex)
+        $returnString = $returnMatches[0].Value + $returnMatches[-1].Value
+        log-verbose "$line -> $returnString"
+        $returnValue += [int]$returnString
       }
-      else {
-        foreach ($key in $numberHash.Keys) {
-          if($line -match "^$key") {
-            $returnMatches += $key
+    }
+    
+    end {
+      return $returnValue
+    }
+  }
+
+  function Get-Part2Answer {
+    [CmdletBinding()]
+    param (
+      [Parameter(ValueFromPipeline=$true)]
+      [string[]]
+      $lines
+    )
+    
+    begin {
+      $returnValue = 0
+      $regex = "\d"
+    }
+    
+    process {
+      foreach ($line in $lines) {
+        $originalLine = $line
+
+        $returnMatches = @()
+        while("" -ne $line) {
+          if($line[0] -match $regex) {
+            $returnMatches += $line[0]
           }
-        }
+          else {
+            foreach ($key in $numberHash.Keys) {
+              if($line -match "^$key") {
+                $returnMatches += $key
+              }
+            }
+          }
+          $line = $line.Substring(1)
+        } 
+        
+        $returnString = (Get-TrueNumberValue $returnMatches[0]) + (Get-TrueNumberValue $returnMatches[-1])
+        log-verbose "Matches found:" ($returnMatches -join ",")
+        log-verbose "$originalLine -> $returnString"
+        $returnValue += [int]$returnString
       }
-      $line = $line.Substring(1)
-    } 
+    }
     
-    $returnString = (Get-TrueNumberValue $returnMatches[0]) + (Get-TrueNumberValue $returnMatches[-1])
-    # log "Matches found:" ($returnMatches -join ",")
-    # log "$originalLine -> $returnString"
-    [int]$returnString
+    end {
+      return $returnValue
+    }
   }
 
-  function Get-NumberValue1(){
-    param($line)
-    
-    $regex = "\d"
-    $returnMatches = [regex]::Matches($line, $regex)
-    $returnString = $returnMatches[0].Value + $returnMatches[-1].Value
-    #log "$line -> $returnString"
-    [int]$returnString
-  }
   #-----------------
   # Global Variables
   $InputFile = Resolve-Path (Join-Path $PSScriptRoot "input.txt")
-  $SumOfCalibrationValues = 0
   $numberHash = [ordered]@{"one"="1";
     "two"="2";
     "three"="3";
@@ -94,18 +129,11 @@ begin {
     "nine"="9"}
 }
 process {
-  get-content $InputFile | ForEach-Object {
-    $Line = $_
-    $SumOfCalibrationValues += Get-NumberValue1 $Line
-  }
-  log "1st Total Sum of all Calibration Values:" $SumOfCalibrationValues
-  
-  $SumOfCalibrationValues = 0
-  get-content $InputFile | ForEach-Object {
-    $Line = $_
-    $SumOfCalibrationValues += Get-NumberValue2 $Line
-  }
-  log "2nd Total Sum of all Calibration Values:" $SumOfCalibrationValues
+  $lines = get-content $InputFile
+
+  log "Part 1 Answer:" ($lines | Get-Part1Answer)
+
+  log "Part 2 Answer:" ($lines | Get-Part2Answer)
 }
 end {
 }
