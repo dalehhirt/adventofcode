@@ -10,9 +10,10 @@ param(
     [switch]$Force
 )
 begin {
-  function log() {
-    write-host ">>> [$($env:COMPUTERNAME)]" ((Get-Date).ToUniversalTime().ToString('u')) "$args" -ForeGroundColor Green
-  }
+
+  #-----------------
+  # Helper functions
+  Import-Module $PSScriptRoot\modules\AdventOfCode.Util -Force
 
   function Init-TextFile() {
     param($directory, [switch]$Force)
