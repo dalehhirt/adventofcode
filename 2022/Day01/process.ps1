@@ -45,18 +45,6 @@ Find the Elf carrying the most Calories. How many total Calories is that Elf car
 [CmdletBinding(SupportsShouldProcess=$true)]
 param()
 begin {
-  function log() {
-    write-host ">>> [$($env:COMPUTERNAME)]" ((Get-Date).ToUniversalTime().ToString('u')) "$args" -ForeGroundColor Green
-  }
-  
-  function log-verbose() {
-    write-verbose ">>> [$($env:COMPUTERNAME)] $((Get-Date).ToUniversalTime().ToString('u')) $args"
-  }
-  
-  function log-error() {
-    write-error ">>> [$($env:COMPUTERNAME)] $((Get-Date).ToUniversalTime().ToString('u')) $args"
-  }
-
   function Get-Part1Answer {
     [CmdletBinding()]
     param (
@@ -120,6 +108,10 @@ begin {
       return $returnValue
     }
   }
+
+  #-----------------
+  # Helper functions
+  Import-Module $PSScriptRoot\..\..\modules\AdventOfCode.Util
 
   #-----------------
   # Global Variables
