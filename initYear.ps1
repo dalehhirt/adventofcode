@@ -17,10 +17,13 @@ begin {
 
   function Init-TextFile() {
     param($directory, [switch]$Force)
-    $textFilePath = join-path $directory "input.txt"
-    if (!(Test-Path $textFilePath) -or $Force) {
-        log "Initializing $textFilePath"
-        "Placeholder input text file" | Out-File -FilePath $textFilePath -Force
+    1..2 | foreach {
+      $i = $_
+      $textFilePath = join-path $directory "input$i.txt"
+      if (!(Test-Path $textFilePath) -or $Force) {
+          log "Initializing $textFilePath"
+          "Placeholder input text file" | Out-File -FilePath $textFilePath -Force
+      }
     }
   }
 }
