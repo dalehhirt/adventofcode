@@ -42,7 +42,7 @@ process {
       }
       Init-TextFile -directory $DayDirectory -Force:$Force
 
-      Copy-Item "$PSScriptRoot\template.ps1" $DayDirectory
+      Copy-Item "$PSScriptRoot\template.ps1" "$DayDirectory\process.ps1"
     }
 }
 end {
