@@ -81,11 +81,51 @@ begin {
     
     begin {
       $returnValue = ""
+      $regex = "(\d+):"
+      $games = @()
     }
     
     process {
       foreach ($line in $lines) {
+        $minRed = 0
+        $minBlue = 0
+        $minGreen = 0
+
+        $game = [regex]::Matches($line, $regex)[0]
+        log-verbose "Game Number" $game.Groups[1]
+        $handfuls = ($line -split ":")[1] -split ";"
+        foreach ($handful in $handfuls) {
+          #log-verbose "Handful:" $handful
+          $cubes = $handful -split ","
+          foreach ($cube in $cubes) {
+            #log-verbose "Cube:" $cube
+            $values = -split $cube
+            #log-verbose $values[1] $values[0]
+            switch ($values[1]) {
+              "green" {
+                if($minGreen -lt [int]$values[0]){
+                  $minGreen = [int]$values[0]
+                }
+              }
+              "red" {
+                if($minRed -lt [int]$values[0]){
+                  $minRed = [int]$values[0]
+                }
+              }
+              "blue" {
+                if($minBlue -lt [int]$values[0]){
+                  $minBlue = [int]$values[0]
+                }
+              }
+              Default {}
+            }
+          }
+        }
+        # Sum here
+        $games += ($minRed * $minBlue * $minGreen)
       }
+
+      $returnValue = ($games | Measure-Object -sum).sum
     }
     
     end {
@@ -99,15 +139,15 @@ begin {
 
   #-----------------
   # Global Variables
-  $InputFile = Resolve-Path (Join-Path $PSScriptRoot "input.txt")
-  log-verbose "Input file path: $InputFile"
+  $InputFile1 = Resolve-Path (Join-Path $PSScriptRoot "input1.txt")
+  log-verbose "Input file 1 path: $InputFile1"
+  $InputFile2 = Resolve-Path (Join-Path $PSScriptRoot "input2.txt")
+  log-verbose "Input file 1 path: $InputFile2"
 }
 process {
-  $lines = get-content $InputFile
+  log "Part 1 Answer:" (get-content $InputFile1 | Get-Part1Answer)
 
-  log "Part 1 Answer:" ($lines | Get-Part1Answer)
-
-  log "Part 2 Answer:" ($lines | Get-Part2Answer)
+  log "Part 2 Answer:" (get-content $InputFile2 | Get-Part2Answer)
 }
 end {
 }
