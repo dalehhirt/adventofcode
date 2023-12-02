@@ -58,7 +58,7 @@ begin {
   $InputFile1 = Resolve-Path (Join-Path $PSScriptRoot "input1.txt")
   log-verbose "Input file 1 path: $InputFile1"
   $InputFile2 = Resolve-Path (Join-Path $PSScriptRoot "input2.txt")
-  log-verbose "Input file 1 path: $InputFile2"
+  log-verbose "Input file 2 path: $InputFile2"
 }
 process {
   log "Part 1 Answer:" (get-content $InputFile1 | Get-Part1Answer)

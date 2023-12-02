@@ -94,7 +94,7 @@ begin {
   $InputFile1 = Resolve-Path (Join-Path $PSScriptRoot "input1.txt")
   log-verbose "Input file 1 path: $InputFile1"
   $InputFile2 = Resolve-Path (Join-Path $PSScriptRoot "input2.txt")
-  log-verbose "Input file 1 path: $InputFile2"
+  log-verbose "Input file 2 path: $InputFile2"
   $numberHash = [ordered]@{"one"="1";
     "two"="2";
     "three"="3";
