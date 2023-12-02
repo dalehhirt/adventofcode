@@ -55,15 +55,15 @@ begin {
 
   #-----------------
   # Global Variables
-  $InputFile = Resolve-Path (Join-Path $PSScriptRoot "input.txt")
-  log-verbose "Input file path: $InputFile"
+  $InputFile1 = Resolve-Path (Join-Path $PSScriptRoot "input1.txt")
+  log-verbose "Input file 1 path: $InputFile1"
+  $InputFile2 = Resolve-Path (Join-Path $PSScriptRoot "input2.txt")
+  log-verbose "Input file 1 path: $InputFile2"
 }
 process {
-  $lines = get-content $InputFile
+  log "Part 1 Answer:" (get-content $InputFile1 | Get-Part1Answer)
 
-  log "Part 1 Answer:" ($lines | Get-Part1Answer)
-
-  log "Part 2 Answer:" ($lines | Get-Part2Answer)
+  log "Part 2 Answer:" (get-content $InputFile2 | Get-Part2Answer)
 }
 end {
 }
