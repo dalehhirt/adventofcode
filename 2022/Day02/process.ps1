@@ -68,7 +68,7 @@ begin {
         $rightHandPartTwo = $rightHandValuesPartTwo[$choices[1]]
         
         switch ($rightHandPartTwo) {
-          "win" { $rightHand = $baseValues.keys | where {$baseValues[$_].Beats -eq $lefthand} }
+          "win" { $rightHand = $baseValues.keys | Where-Object {$baseValues[$_].Beats -eq $lefthand} }
           "lose" { $rightHand = $baseValues[$leftHand].Beats }
           "draw" { $rightHand = $leftHand }
         }
