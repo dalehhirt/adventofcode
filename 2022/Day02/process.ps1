@@ -1,6 +1,8 @@
 <#
 .Description
 This script runs.
+.LINK
+https://adventofcode.com/2022/day/2
 #>
 [CmdletBinding(SupportsShouldProcess=$true)]
 param()
