@@ -1,1 +1,3 @@
-Placeholder input text file
+A Y
+B X
+C Z

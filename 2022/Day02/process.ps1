@@ -57,14 +57,39 @@ begin {
     
     begin {
       $returnValue = ""
+      $scores = $()
     }
     
     process {
       foreach ($line in $lines) {
+        $choices = -split $line
+
+        $leftHand = $leftHandValues[$choices[0]]
+        $rightHandPartTwo = $rightHandValuesPartTwo[$choices[1]]
+        
+        switch ($rightHandPartTwo) {
+          "win" { $rightHand = $baseValues.keys | where {$baseValues[$_].Beats -eq $lefthand} }
+          "lose" { $rightHand = $baseValues[$leftHand].Beats }
+          "draw" { $rightHand = $leftHand }
+        }
+
+        log-verbose "First Player $leftHand <-> Second Player $rightHand"
+        $score = $baseValues[$rightHand].Value
+        if($leftHand -eq $rightHand) {
+          $score += $drawScore
+        }
+        elseif ($baseValues[$leftHand].Beats -eq $rightHand) {
+          $score += $lossScore
+        }
+        else {
+          $score += $winScore
+        }
+        $scores += $score
       }
     }
     
     end {
+      $returnValue = ($scores | Measure-Object -Sum).Sum
       return $returnValue
     }
   }
@@ -96,6 +121,7 @@ begin {
   }
   $leftHandValues = @{"A"="rock"; "B"="paper"; "C" = "scissors"}
   $rightHandValues = @{"X"="rock"; "Y"="paper"; "Z" = "scissors"}
+  $rightHandValuesPartTwo = @{"X"="lose"; "Y"="draw"; "Z" = "win"}
   $winScore = 6
   $lossScore = 0
   $drawScore = 3
