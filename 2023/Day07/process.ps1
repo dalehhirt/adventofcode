@@ -7,6 +7,24 @@ This script runs.
 [CmdletBinding(SupportsShouldProcess=$true)]
 param()
 begin {
+  function Process-Part1 {
+    [CmdletBinding()]
+    param (
+      $line
+    )
+    
+    begin {
+      
+    }
+    
+    process {
+      
+    }
+    
+    end {
+      
+    }
+  }
   function Get-Part1Answer {
     [CmdletBinding()]
     param (
@@ -16,16 +34,36 @@ begin {
     )
     
     begin {
-      $returnValue = ""
+      $returnValue = 0
     }
     
     process {
       foreach ($line in $lines) {
+        $returnValue += Process-Part1 -line $line
       }
     }
     
     end {
       return $returnValue
+    }
+  }
+
+  function Process-Part2 {
+    [CmdletBinding()]
+    param (
+      $line
+    )
+    
+    begin {
+      
+    }
+    
+    process {
+      
+    }
+    
+    end {
+      
     }
   }
 
@@ -38,11 +76,12 @@ begin {
     )
     
     begin {
-      $returnValue = ""
+      $returnValue = 0
     }
     
     process {
       foreach ($line in $lines) {
+        $returnValue += Process-Part2 -line $line
       }
     }
     
