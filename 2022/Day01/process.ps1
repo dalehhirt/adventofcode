@@ -81,7 +81,7 @@ begin {
 
   #-----------------
   # Helper functions
-  Import-Module $PSScriptRoot\..\..\modules\AdventOfCode.Util -Force -verbose:$false
+  Import-Module $PSScriptRoot\..\..\modules\AdventOfCode.Util -Force -verbose:$false -DisableNameChecking
 
   #-----------------
   # Global Variables

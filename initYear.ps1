@@ -13,7 +13,7 @@ begin {
 
   #-----------------
   # Helper functions
-  Import-Module $PSScriptRoot\modules\AdventOfCode.Util -Force -verbose:$false
+  Import-Module $PSScriptRoot\modules\AdventOfCode.Util -Force -verbose:$false -DisableNameChecking
 
   function Init-TextFile() {
     param($directory, [switch]$Force)
