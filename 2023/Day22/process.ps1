@@ -14,7 +14,7 @@ begin {
     )
     
     begin {
-      
+      $returnValue = 0
     }
     
     process {
@@ -22,7 +22,7 @@ begin {
     }
     
     end {
-      
+      return $returnValue
     }
   }
   function Get-Part1Answer {
@@ -55,7 +55,7 @@ begin {
     )
     
     begin {
-      
+      $returnValue = 0
     }
     
     process {
@@ -63,7 +63,7 @@ begin {
     }
     
     end {
-      
+      return $returnValue
     }
   }
 
