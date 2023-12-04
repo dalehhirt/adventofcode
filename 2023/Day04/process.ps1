@@ -137,7 +137,7 @@ begin {
           $cardCopies[$cardNumber + $i] += 1
         }
 
-        log-verbose "Processing copies of card $cardNumber"
+        log-verbose "Processing $($cardCopies[$cardNumber] - 1) copies of card $cardNumber"
         for ($i = 1; $i -lt ($cardCopies[$cardNumber]); $i++) {
           for ($j = 0; $j -lt ($processValue - 1); $j++) {
             $cardCopies[$cardNumber + 1 + $j] += 1
