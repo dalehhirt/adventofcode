@@ -123,8 +123,8 @@ begin {
     
     begin {
       $returnValue = 0
-      $cardCopies = @{}
       $cardNumber = 0
+      $cardCopies = @{}
     }
     
     process {
@@ -132,39 +132,16 @@ begin {
         $cardNumber += 1
         $processValue = Process-Part2 -line $line
 
-        $loopCardNumber = $cardNumber
-        $loopValue = $processValue
-        while ($loopValue -ne 0) {
-          log-verbose "Looping card" $loopCardNumber $loopValue
-          if($null -eq $cardCopies[$loopCardNumber]) {
-            $cardCopies[$loopCardNumber] = 1
-          }
-          else {
-            $cardCopies[$loopCardNumber] += 1
-          }
-          $loopValue--
-          $loopCardNumber += 1    
+        log-verbose "Adding copies to cards for $cardNumber"
+        for ($i = 0; $i -lt $processValue; $i++) {
+          $cardCopies[$cardNumber + $i] += 1
         }
 
-        # do it one more time for all existing copies
-        $outerLoopValue = $cardCopies[$cardNumber] - 1
-
-        while ($outerLoopValue -ne 0) {
-          log-verbose "Looping outer" $outerLoopValue
-          $loopCardNumber = $cardNumber + 1
-          $loopValue = $processValue - 1
-          while ($loopValue -ne 0) {
-            log-verbose "Looping card" $loopCardNumber $loopValue
-            if($null -eq $cardCopies[$loopCardNumber]) {
-              $cardCopies[$loopCardNumber] = 1
-            }
-            else {
-              $cardCopies[$loopCardNumber] += 1
-            }
-            $loopValue--
-            $loopCardNumber += 1    
+        log-verbose "Processing copies of card $cardNumber"
+        for ($i = 1; $i -lt ($cardCopies[$cardNumber]); $i++) {
+          for ($j = 0; $j -lt ($processValue - 1); $j++) {
+            $cardCopies[$cardNumber + 1 + $j] += 1
           }
-          $outerLoopValue--
         }
       }
     }
