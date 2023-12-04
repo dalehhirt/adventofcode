@@ -132,12 +132,12 @@ begin {
         $cardNumber += 1
         $processValue = Process-Part2 -line $line
 
-        log-verbose "Adding copies to cards for $cardNumber"
+        log-verbose "Adding copies to $processValue cards for $cardNumber"
         for ($i = 0; $i -lt $processValue; $i++) {
           $cardCopies[$cardNumber + $i] += 1
         }
 
-        log-verbose "Processing $($cardCopies[$cardNumber] - 1) copies of card $cardNumber"
+        log-verbose "Processing $($cardCopies[$cardNumber] - 1) copies of card $cardNumber $($processValue - 1) times"
         for ($i = 1; $i -lt ($cardCopies[$cardNumber]); $i++) {
           for ($j = 0; $j -lt ($processValue - 1); $j++) {
             $cardCopies[$cardNumber + 1 + $j] += 1
