@@ -18,13 +18,41 @@ begin {
     }
     
     process {
-      
+      # this should always split in two
+      $splits = $line -split ":"
+      $cardNumber = ([regex]::Match($splits[0], '\d+')).Value
+
+      log-verbose "Processing Card Number" $cardNumber
+
+      # this should always split in two as well
+      $cardValues = $splits[1] -split "\|"
+      $initialValues = $cardValues[0] -split " "| Where-Object {$_ -ne ""}
+      $checkValues = $cardValues[1] -split " " | Where-Object {$_ -ne ""}
+
+      $sameMatchesCount = 0
+      $initialValues | ForEach-Object {
+        if($checkValues -contains $_){
+          $sameMatchesCount++
+        }
+      }
+
+      if($sameMatchesCount -ge 1) {
+        $loopCount = $sameMatchesCount
+        $returnValue = 1
+        $loopCount--
+        while($loopCount -ge 1) {
+          $returnValue *= 2
+          $loopCount-- 
+        }
+      }
+
     }
     
     end {
       return $returnValue
     }
   }
+
   function Get-Part1Answer {
     [CmdletBinding()]
     param (
