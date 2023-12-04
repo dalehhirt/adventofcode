@@ -87,7 +87,25 @@ begin {
     }
     
     process {
+      # this should always split in two
+      $splits = $line -split ":"
+      $cardNumber = ([regex]::Match($splits[0], '\d+')).Value
+
+      log-verbose "Processing Card Number" $cardNumber
+
+      # this should always split in two as well
+      $cardValues = $splits[1] -split "\|"
+      $initialValues = $cardValues[0] -split " "| Where-Object {$_ -ne ""}
+      $checkValues = $cardValues[1] -split " " | Where-Object {$_ -ne ""}
+
+      $sameMatchesCount = 0
+      $initialValues | ForEach-Object {
+        if($checkValues -contains $_){
+          $sameMatchesCount++
+        }
+      }
       
+      $returnValue = $sameMatchesCount + 1 # The one is for the card we are currently working on
     }
     
     end {
@@ -105,15 +123,54 @@ begin {
     
     begin {
       $returnValue = 0
+      $cardCopies = @{}
+      $cardNumber = 0
     }
     
     process {
       foreach ($line in $lines) {
-        $returnValue += Process-Part2 -line $line
+        $cardNumber += 1
+        $processValue = Process-Part2 -line $line
+
+        $loopCardNumber = $cardNumber
+        $loopValue = $processValue
+        while ($loopValue -ne 0) {
+          log-verbose "Looping card" $loopCardNumber $loopValue
+          if($null -eq $cardCopies[$loopCardNumber]) {
+            $cardCopies[$loopCardNumber] = 1
+          }
+          else {
+            $cardCopies[$loopCardNumber] += 1
+          }
+          $loopValue--
+          $loopCardNumber += 1    
+        }
+
+        # do it one more time for all existing copies
+        $outerLoopValue = $cardCopies[$cardNumber] - 1
+
+        while ($outerLoopValue -ne 0) {
+          log-verbose "Looping outer" $outerLoopValue
+          $loopCardNumber = $cardNumber + 1
+          $loopValue = $processValue - 1
+          while ($loopValue -ne 0) {
+            log-verbose "Looping card" $loopCardNumber $loopValue
+            if($null -eq $cardCopies[$loopCardNumber]) {
+              $cardCopies[$loopCardNumber] = 1
+            }
+            else {
+              $cardCopies[$loopCardNumber] += 1
+            }
+            $loopValue--
+            $loopCardNumber += 1    
+          }
+          $outerLoopValue--
+        }
       }
     }
     
     end {
+      $returnValue = ($cardCopies.Keys | ForEach-Object {$cardCopies[$_]} | measure-object -sum).sum
       return $returnValue
     }
   }
