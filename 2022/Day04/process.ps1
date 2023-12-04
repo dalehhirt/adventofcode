@@ -29,11 +29,13 @@ begin {
       $pair1Ids = $pair1Split[0] .. $pair1Split[1]
       $pair2Ids = $pair2Split[0] .. $pair2Split[1]
 
-      $inPair = 0
+      log-verbose "Pair 1 Count" $pair1Ids.Count
+      log-verbose "Pair 2 Count" $pair2Ids.Count
+
       $inPair1 = $pair1Ids | Where-Object {$pair2Ids -contains $_} 
       $inPair2 = $pair2Ids | Where-Object {$pair1Ids -contains $_}
 
-      if(($inPair1 -eq $pair1Ids.Count) -or ($inPair2 -eq $pair12ds.Count)) {
+      if(($inPair1.count -eq $pair1Ids.Count) -or ($inPair2.count -eq $pair2ids.Count)) {
         $returnValue = 1
       }
     }
