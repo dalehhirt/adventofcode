@@ -36,6 +36,29 @@ begin {
     }
   }
 
+  function Check-SameValues() {
+    [CmdletBinding()]
+    param (
+        $FirstString,
+        $SecondString
+    )
+    begin {
+      $returnValues = @()
+    }
+    process{
+      for ($i = 0; $i -lt $FirstString.Length; $i++) {
+        for ($j = 0; $j -lt $SecondString.Length; $j++) {
+          if($FirstString[$i] -ceq $SecondString[$j]) {
+            $returnValues += $($FirstString[$i])
+          }
+        }
+      }
+    }
+    end {
+      return $returnValues
+    }
+  }
+
   function Get-Part1Answer {
     [CmdletBinding()]
     param (
@@ -50,21 +73,38 @@ begin {
     
     process {
       foreach ($line in $lines) {
-        $sameValues = @()
         $halfLine = ($line.Length / 2)
-        $firstHalf = $line.Substring(0, $halfLine)
-        $secondHalf = $line.Substring($halfLine)
-        for ($i = 0; $i -lt $halfLine; $i++) {
-          for ($j = 0; $j -lt $halfLine; $j++) {
-            if($firstHalf[$i] -ceq $secondHalf[$j]) {
-              $sameValues += $($firstHalf[$i])
-            }
-          }
-        }
+
+        $SameValues = Check-SameValues -FirstString $line.Substring(0, $halfLine) -SecondString $line.Substring($halfLine)
+
         # Only need to specify type once
         $SameValues = $SameValues | Select-Object -Unique
         $returnValue += $SameValues | Get-CharValue 
       }
+    }
+    
+    end {
+      return $returnValue
+    }
+  }
+
+  function Process-Part2 {
+    [CmdletBinding()]
+    param (
+      $lines
+    )
+    
+    begin {
+      $returnValue = 0
+    }
+    
+    process {
+      $sameValues = Check-SameValues -FirstString $lines[0] -SecondString $lines[1]
+      $SameValues = Check-SameValues -FirstString $lines[2] -SecondString (-join $SameValues)
+
+      $SameValues = $SameValues | Select-Object -Unique
+      $returnValue = $SameValues | Get-CharValue 
+
     }
     
     end {
@@ -81,11 +121,18 @@ begin {
     )
     
     begin {
-      $returnValue = ""
+      $returnValue = 0
+      $groupLines = $()
     }
     
     process {
       foreach ($line in $lines) {
+        $groupLines += @($line)
+
+        if($groupLines.Count -eq 3) {
+          $returnValue += [int](Process-Part2 -lines $groupLines)
+          $groupLines = $()
+        }
       }
     }
     
