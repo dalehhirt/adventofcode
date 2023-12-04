@@ -78,7 +78,26 @@ begin {
     }
     
     process {
+      $pairs = $line -split ","
       
+      log-verbose "Pair 1" $pairs[0]
+      log-verbose "Pair 2" $pairs[1]
+
+      $pair1Split = $pairs[0] -split "-"
+      $pair2Split = $pairs[1] -split "-"
+
+      $pair1Ids = $pair1Split[0] .. $pair1Split[1]
+      $pair2Ids = $pair2Split[0] .. $pair2Split[1]
+
+      log-verbose "Pair 1 Count" $pair1Ids.Count
+      log-verbose "Pair 2 Count" $pair2Ids.Count
+
+      $inPair1 = $pair1Ids | Where-Object {$pair2Ids -contains $_} 
+      $inPair2 = $pair2Ids | Where-Object {$pair1Ids -contains $_}
+
+      if(($null -ne $inPair1) -or ($null -ne $inPair2)) {
+        $returnValue = 1
+      }      
     }
     
     end {
