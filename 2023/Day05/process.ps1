@@ -62,9 +62,9 @@ begin {
       log-verbose "Parsing for map $sourceMap to $destinationMap"
       foreach ($range in $ranges) {
         $splitLine = $range -split " "
-        $numberRange = ([int]$splitLine[2])
+        $numberRange = ([long]$splitLine[2])
         for ($i = 0; $i -lt $numberRange; $i++) {
-          Add-KeyValuePair -hashTable $returnValue[$sourceMap].SinglePoints -key (([int]$splitLine[1]) + $i) -value (([int]$splitLine[0]) + $i)
+          Add-KeyValuePair -hashTable $returnValue[$sourceMap].SinglePoints -key (([long]$splitLine[1]) + $i) -value (([long]$splitLine[0]) + $i)
         }
       }
     }
@@ -95,7 +95,7 @@ begin {
         $currentValues | foreach {
           $currentValue = $_
           if($null -ne ($currentMap.SinglePoints.Keys | Where-Object {$_ -eq $currentValue})) {
-            $newValues += @($currentMap.SinglePoints[[int]$currentValue])
+            $newValues += @($currentMap.SinglePoints[[long]$currentValue])
           }
           else {
             $newValues += @($currentValue)
