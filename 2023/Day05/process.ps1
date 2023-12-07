@@ -186,15 +186,41 @@ begin {
     
     begin {
       $returnValue = 0
+      $seeds = @()
+      $maps = @{}
+      $currentMapName = ""
+      $currentMapLines = @()
     }
     
     process {
       foreach ($line in $lines) {
-        $returnValue += Process-Part2 -line $line
+        if([regex]::match($line, "^seeds:").Success -eq $true){
+          $splitSeeds = $line.Replace("seeds:", "") -split " " | Where-Object{$_ -ne ""}
+          for ($i = 0; $i -lt $splitSeeds.Count; $i += 2) {
+            $seeds += [long]$splitSeeds[$i] .. ([long]$splitSeeds[$i] + [long]$splitSeeds[$i + 1])
+          }
+        }
+        elseif([regex]::match($line, "^.*\smap:").Success -eq $true){
+          if($currentMapName -ne "") {
+            log-verbose "Creating map for $currentMapName"
+            $maps += Create-Map -MapName $currentMapName -ranges $currentMapLines
+            $currentMapLines = @()
+          }
+          $currentMapName = $line.Replace(" map:", "")
+        }
+        elseif ($line -ne "") {
+          $currentMapLines += $line
+        }
+        #$returnValue += Process-Part1 -line $line
       }
     }
     
     end {
+      # one last time to account for last set of values
+      log-verbose "Creating map for $currentMapName"
+      $maps += Create-Map -MapName $currentMapName -ranges $currentMapLines
+
+      $returnValue = Process-Part1 -seeds $seeds -maps $maps
       return $returnValue
     }
   }
