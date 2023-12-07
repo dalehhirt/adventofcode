@@ -7,41 +7,21 @@ This script runs.
 [CmdletBinding(SupportsShouldProcess=$true)]
 param()
 begin {
+  class Range {
+    [long]$SourceStart
+    [long]$DestinationStart
+    [long]$NumberRange
+  }
+
   class Map {
     [string] $SourceMap
     [string] $DestinationMap
-    [object] $SinglePoints
+    [object] $Ranges
     Map() {
-      $this.SinglePoints = @{}
+      $this.Ranges = @()
     }
   }
 
-  function Add-KeyValuePair {
-    [CmdletBinding()]
-    param (
-      $hashTable,
-      $key,
-      $value
-    )
-    
-    begin {
-      
-    }
-    
-    process {
-      $found = $hashTable.Keys | Where-Object {$_ -eq $key}
-      if($null -eq $found) {
-        $hashTable.Add($key, $value)
-      }
-      else {
-        $hashTable[$key] = $value
-      }
-    }
-    
-    end {
-      
-    }
-  }
   function Create-Map {
     param (
       [string]$MapName,
@@ -59,13 +39,21 @@ begin {
     }
     
     process {
-      log-verbose "Parsing for map $sourceMap to $destinationMap"
+      log-verbose "Parsing map $sourceMap to $destinationMap"
       foreach ($range in $ranges) {
         $splitLine = $range -split " "
         $numberRange = ([long]$splitLine[2])
-        for ($i = 0; $i -lt $numberRange; $i++) {
-          Add-KeyValuePair -hashTable $returnValue[$sourceMap].SinglePoints -key (([long]$splitLine[1]) + $i) -value (([long]$splitLine[0]) + $i)
-        }
+        log-verbose "Range:  $range"
+        log-verbose "Number spread: $numberRange"
+        log-verbose "Source Range: $([long]$splitLine[1]) to $([long]$splitLine[1] + $numberRange - 1)"
+        log-verbose "Destination Range: $([long]$splitLine[0]) to $([long]$splitLine[0] + $numberRange - 1)"
+        
+        $range = [Range]::new()
+        $range.SourceStart = [long]$splitLine[1]
+        $range.DestinationStart = [long]$splitLine[0]
+        $range.NumberRange = $numberRange
+
+        $returnValue[$sourceMap].Ranges += @($range)
       }
     }
     
@@ -92,13 +80,19 @@ begin {
         log-verbose "Checking against $currentSet map"
         $currentMap = $maps[$currentSet]
         $newValues = @()
-        $currentValues | foreach {
-          $currentValue = $_
-          if($null -ne ($currentMap.SinglePoints.Keys | Where-Object {$_ -eq $currentValue})) {
-            $newValues += @($currentMap.SinglePoints[[long]$currentValue])
+        $currentValues | ForEach-Object {
+          $currentValue = [long]$_
+          $foundValue = [long]-1
+          foreach ($range in $currentMap.Ranges) {
+            if(($currentValue -ge $range.SourceStart) -and ($currentValue -lt ($range.SourceStart + $range.NumberRange))){
+              $foundValue = [long]$range.DestinationStart + [long]([long]$currentValue - [long]$range.SourceStart)
+            }
+          }
+          if($foundValue -eq -1) {
+            $newValues += @($currentValue)
           }
           else {
-            $newValues += @($currentValue)
+            $newValues += @($foundValue)
           }
         }
         $currentValues = $newValues
