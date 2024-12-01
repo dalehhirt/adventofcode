@@ -2,7 +2,7 @@
 .Description
 This script runs.
 .LINK
-<Replace with link to day problem>
+https://adventofcode.com/2024/day/1
 #>
 [CmdletBinding(SupportsShouldProcess=$true)]
 param()
@@ -35,15 +35,32 @@ begin {
     
     begin {
       $returnValue = 0
+      $list1 = @()
+      $list2 = @()
     }
     
     process {
       foreach ($line in $lines) {
-        $returnValue += Process-Part1 -line $line
+        $splitish = -split $line
+        $list1 += [int]$splitish[0]
+        $list2 += [int]$splitish[1]
       }
     }
     
     end {
+      $sortedList1 = $list1 | Sort-Object
+      $sortedList2 = $list2 | Sort-Object
+
+      for ($i = 0; $i -lt $sortedList1.Count; $i++) {
+        $one = $sortedList1[$i]
+        $two = $sortedList2[$i]
+        if($one -lt $two) {
+          $returnValue += $two - $one
+        }
+        else {
+          $returnValue += $one - $two
+        } 
+      }
       return $returnValue
     }
   }
@@ -77,15 +94,27 @@ begin {
     
     begin {
       $returnValue = 0
+      $list1 = @()
+      $list2 = @()
     }
     
     process {
       foreach ($line in $lines) {
-        $returnValue += Process-Part2 -line $line
+        $splitish = -split $line
+        $list1 += [int]$splitish[0]
+        $list2 += [int]$splitish[1]
       }
     }
     
     end {
+      $sortedList1 = $list1 | Sort-Object
+      $sortedList2 = $list2 | Sort-Object
+
+      for ($i = 0; $i -lt $sortedList1.Count; $i++) {
+        $one = $sortedList1[$i]
+        $twoList = $sortedList2 | Where-Object {$_ -eq $one}
+        $returnValue += $one * $twoList.Count
+      }
       return $returnValue
     }
   }
