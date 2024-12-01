@@ -6,37 +6,43 @@ This script runs.
 param(
     [Parameter(Mandatory=$true)]
     [int]
-    $Year
+    $Year,
+    [switch]$Force
 )
 begin {
-  function log() {
-    write-host ">>> [$($env:COMPUTERNAME)]" ((Get-Date).ToUniversalTime().ToString('u')) "$args" -ForeGroundColor Green
-  }
+
+  #-----------------
+  # Helper functions
+  Import-Module $PSScriptRoot\modules\AdventOfCode.Util -Force -verbose:$false -DisableNameChecking
 
   function Init-TextFile() {
-    param($directory)
-    $textFilePath = join-path $directory "Placeholder.txt"
-    if (!(Test-Path $textFilePath)) {
-        log "Initializing $textFilePath"
-        "Placeholder text file" | Out-File -FilePath $textFilePath -Force
+    param($directory, [switch]$Force)
+    1..2 | foreach {
+      $i = $_
+      $textFilePath = join-path $directory "input$i.txt"
+      if (!(Test-Path $textFilePath) -or $Force) {
+          log "Initializing $textFilePath"
+          "Placeholder input text file" | Out-File -FilePath $textFilePath -Force
+      }
     }
   }
 }
 process {
     $YearPath = (Join-Path $PSScriptRoot $Year)
     if (!(Test-Path $YearPath)) {
-        log "Initializing $YearPath"
-        mkdir $YearPath
-        Init-TextFile -directory $YearPath
+      log "Initializing $YearPath"
+      mkdir $YearPath
     }
     1..25 | ForEach-Object {
-        $DayDirectory = Join-Path $YearPath ("Day{0}" -f $_.ToString("00"))
+      $DayDirectory = Join-Path $YearPath ("Day{0}" -f $_.ToString("00"))
 
-        if (!(Test-Path $DayDirectory)) {
-            log "Initializing $DayDirectory"
-            mkdir $DayDirectory
-            Init-TextFile -directory $DayDirectory
-        }
+      if (!(Test-Path $DayDirectory)) {
+          log "Initializing $DayDirectory"
+          mkdir $DayDirectory
+      }
+      Init-TextFile -directory $DayDirectory -Force:$Force
+
+      Copy-Item "$PSScriptRoot\template.ps1" "$DayDirectory\process.ps1"
     }
 }
 end {
