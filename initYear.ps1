@@ -44,6 +44,8 @@ process {
 
       Copy-Item "$PSScriptRoot\template.ps1" "$DayDirectory\process.ps1"
     }
+
+    Copy-Item "$PSScriptRoot\templateYear.ps1" "$YearPath\runYear.ps1"
 }
 end {
 }
