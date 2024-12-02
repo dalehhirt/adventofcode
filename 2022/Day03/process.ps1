@@ -104,7 +104,7 @@ begin {
 
       $SameValues = $SameValues | Select-Object -Unique
       $returnValue = $SameValues | Get-CharValue 
-
+      
     }
     
     end {
@@ -167,9 +167,21 @@ begin {
   }
 }
 process {
-  log "Part 1 Answer:" (get-content $InputFile1 | Get-Part1Answer)
+  if((get-content $InputFile1) -eq "Placeholder input text file") {
+    log "Input 1 data does not exist yet."
+  }
+  else {
+    log "Processing Part 1..."
+    log "Part 1 Answer:" (get-content $InputFile1 | Get-Part1Answer)
+  }
 
-  log "Part 2 Answer:" (get-content $InputFile2 | Get-Part2Answer)
+  if((get-content $InputFile2) -eq "Placeholder input text file") {
+    log "Input 2 data does not exist yet."
+  }
+  else {
+    log "Processing Part 2..."
+    log "Part 2 Answer:" (get-content $InputFile2 | Get-Part2Answer)
+  }
 }
 end {
 }
