@@ -15,10 +15,16 @@ begin {
     
     begin {
       $returnValue = 0
+      $regex = "mul\((\d+),(\d+)\)"
     }
     
     process {
-      
+      $matchesLine = ([regex]$regex).Matches($line)
+      log "Matches:" $matchesLine.count
+      $matchesLine | foreach {
+        $matchLine = $_
+        $returnValue += ([int]$matchLine.Groups[1].Value * [int]$matchLine.Groups[2].Value)
+      }
     }
     
     end {
