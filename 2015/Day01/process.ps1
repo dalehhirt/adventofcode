@@ -18,7 +18,14 @@ begin {
     }
     
     process {
-      
+      for ($i = 0; $i -lt $line.length; $i++) {
+        $val = $line[$i]
+        switch ($val) {
+          "(" { $returnValue++ }
+          ")" { $returnValue-- }
+          Default {}
+        }
+      }
     }
     
     end {
@@ -56,9 +63,24 @@ begin {
     
     begin {
       $returnValue = 0
+      $basementFloor = -1
+      $currentPosition = 0
     }
     
     process {
+      for ($i = 0; $i -lt $line.length; $i++) {
+        $val = $line[$i]
+        switch ($val) {
+          "(" { $currentPosition++ }
+          ")" { $currentPosition-- }
+          Default {}
+        }
+        log "$i floor $currentPosition"
+        if ($basementFloor -eq $currentPosition) {
+          $returnValue = $i + 1
+          break
+        }
+      }
       
     }
     
