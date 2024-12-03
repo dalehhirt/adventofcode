@@ -20,7 +20,7 @@ begin {
     
     process {
       $matchesLine = ([regex]$regex).Matches($line)
-      log "Matches:" $matchesLine.count
+      #log "Matches:" $matchesLine.count
       $matchesLine | foreach {
         $matchLine = $_
         $returnValue += ([int]$matchLine.Groups[1].Value * [int]$matchLine.Groups[2].Value)
@@ -62,10 +62,40 @@ begin {
     
     begin {
       $returnValue = 0
+      $regex = "mul\((\d+),(\d+)\)"
+      $doRegex = "do\(\)"
+      $dontRegex = "don\'t\(\)"
+      $enableLine = @($null) * $line.Length
     }
     
     process {
-      
+      $doMatchesLines = ([regex]$doRegex).Matches($line) | foreach {$_.Index} | Sort-Object
+      $dontMatchesLine = ([regex]$dontRegex).Matches($line) | foreach {$_.Index} | Sort-Object
+      $locationValue = 1
+      for ($i = 0; $i -lt $enableLine.Count; $i++) {
+        if($doMatchesLines -contains $i) {
+          log "Resetting to do" $i
+          $locationValue = 1
+        }
+        if ($dontMatchesLine -contains $i) {
+          log "Resetting to don't" $i
+          $locationValue = 0
+        }
+        $enableLine[$i] = $locationValue
+      }
+
+      $matchesLine = ([regex]$regex).Matches($line)
+      log "Matches:" $matchesLine.count
+      $matchesLine | foreach {
+        $matchLine = $_
+        if($enableLine[$matchLine.Index] -eq 1) {
+          log "adding" $matchLine.Index $matchLine.Groups[0]
+          $returnValue += ([int]$matchLine.Groups[1].Value * [int]$matchLine.Groups[2].Value)
+        }
+        else {
+          log "skipping " $matchLine.Index $matchLine.Groups[0]
+        }
+      }
     }
     
     end {
@@ -82,17 +112,17 @@ begin {
     )
     
     begin {
-      $returnValue = 0
+      $returnValue = ""
     }
     
     process {
       foreach ($line in $lines) {
-        $returnValue += Process-Part2 -line $line
+        $returnValue += $line
       }
     }
     
     end {
-      return $returnValue
+      return Process-Part2 -line $returnValue
     }
   }
 
