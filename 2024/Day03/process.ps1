@@ -74,26 +74,26 @@ begin {
       $locationValue = 1
       for ($i = 0; $i -lt $enableLine.Count; $i++) {
         if($doMatchesLines -contains $i) {
-          log "Resetting to do" $i
+          #log "Resetting to do" $i
           $locationValue = 1
         }
         if ($dontMatchesLine -contains $i) {
-          log "Resetting to don't" $i
+          #log "Resetting to don't" $i
           $locationValue = 0
         }
         $enableLine[$i] = $locationValue
       }
 
       $matchesLine = ([regex]$regex).Matches($line)
-      log "Matches:" $matchesLine.count
+      #log "Matches:" $matchesLine.count
       $matchesLine | foreach {
         $matchLine = $_
         if($enableLine[$matchLine.Index] -eq 1) {
-          log "adding" $matchLine.Index $matchLine.Groups[0]
+          #log "adding" $matchLine.Index $matchLine.Groups[0]
           $returnValue += ([int]$matchLine.Groups[1].Value * [int]$matchLine.Groups[2].Value)
         }
         else {
-          log "skipping " $matchLine.Index $matchLine.Groups[0]
+          #log "skipping " $matchLine.Index $matchLine.Groups[0]
         }
       }
     }
