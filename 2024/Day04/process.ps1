@@ -8,31 +8,79 @@ https://adventofcode.com/2024/day/4
 param()
 begin {
 
-  function Match-Value {
-    [CmdletBinding()]
+  $points = @{
+    "up" = @(-1, 0)
+    "down" = @(1, 0)
+    "left" = @(0, -1)
+    "right" = @(0, 1)
+    "up-left" = @(-1, -1)
+    "up-right" = @(-1, 1)
+    "down-left" = @(1, -1)
+    "down-right" = @(1, 1)
+  }
+
+  function Search-Word {
     param (
       [string[]]
       $lines,
-      [int]
-      $line,
-      [int]
-      $index,
       [string]
-      $value
+      $word,
+      [int]
+      $lineIndex,
+      [int]
+      $charIndex,
+      [array]
+      $Direction
     )
-    
+
     begin {
-      $returnValue = $false
+      $lineIndexMove = $Direction[0]
+      $charIndexMove = $Direction[1]
+      $lineLength = $lines[0].Length
+      $returnValue = $true
+
+      $startingLineIndex = $lineIndex
+      $startingCharIndex = $charIndex
     }
-    
+
     process {
-      if ($lines[$line - 1][$index] -eq $value) {
-        $returnValue = $true
+
+      $wordIndex = 1
+      $lineIndex += $lineIndexMove
+      $charIndex += $charIndexMove
+
+      while ($wordIndex -lt $word.Length) {
+        if ( ($lineIndex -lt 0) -or 
+          ($lineIndex -ge $lines.Count) -or 
+          ($charIndex -lt 0) -or 
+          ($charIndex -ge $lineLength)) {
+          $returnValue = $false
+          break
+        }
+
+        if ($lines[$lineIndex][$charIndex] -ne $word[$wordIndex]) {
+          $returnValue = $false
+          break
+        }
+
+        $lineIndex += $lineIndexMove
+        $charIndex += $charIndexMove
+        $wordIndex++
       }
     }
-    
+
     end {
-      return $returnValue
+      if ($returnValue) {
+        return [PSCustomObject]@{
+          StartingLineIndex = $startingLineIndex
+          StartingCharIndex = $startingCharIndex
+          LineIndexMove = $lineIndexMove
+          CharIndexMove = $charIndexMove
+        }
+      }
+      else {
+        return $null
+      }
     }
   }
 
@@ -41,110 +89,63 @@ begin {
     param (
       [string[]]
       $lines,
-      [object[]]
-      $matchLines
+      [string]
+      $word
     )
     
     begin {
       $returnValue = 0
-      $totalLength = 4
-      $minIndex = $totalLength - 1
-      $maxIndex = $lines[0].Length - $totalLength -1
-      $minLine = $totalLength
-      $maxLine = $lines.Count - $totalLength
+      $firstLetter = $word[0]
     }
     
     process {
-      foreach ($matchLine in $matchLines) {
-        # There are 8 directions to check for:
+      #foreach ($line in $lines) {
+      for ($i = 0; $i -lt $lines.Count; $i++) {
+        $line = $lines[$i]
 
-        # 1. Up
-        if ($matchLine.Line -ge $minLine) {
-          <# Action to perform if the condition is true #>
-          if(Match-Value -lines $lines -line ($matchLine.Line - 1) -index $matchLine.Index -value "M") {
-            if(Match-Value -lines $lines -line ($matchLine.Line - 2) -index $matchLine.Index -value "A") {
-              if(Match-Value -lines $lines -line ($matchLine.Line - 3) -index $matchLine.Index -value "S") {
-                  $returnValue++
-                  log-verbose "Match found at line $($matchLine.Line) and index $($matchLine.Index) up"
-              }
-            }
-          }
-        }
-        # 2. Down
-        if ($matchLine.Line -le $maxLine) {
-          if(Match-Value -lines $lines -line ($matchLine.Line + 1) -index $matchLine.Index -value "M") {
-            if(Match-Value -lines $lines -line ($matchLine.Line + 2) -index $matchLine.Index -value "A") {
-              if(Match-Value -lines $lines -line ($matchLine.Line + 3) -index $matchLine.Index -value "S") {
-                  $returnValue++
-                  log-verbose "Match found at line $($matchLine.Line) and index $($matchLine.Index) down"
-              }
-            }
-          }
-        }
-        # 3. Left
-        if ($matchLine.index -ge $minIndex) {
-          if(Match-Value -lines $lines -line ($matchLine.Line) -index ($matchLine.Index - 1) -value "M") {
-            if(Match-Value -lines $lines -line ($matchLine.Line) -index ($matchLine.Index - 2) -value "A") {
-              if(Match-Value -lines $lines -line ($matchLine.Line) -index ($matchLine.Index - 3) -value "S") {
-                  $returnValue++
-                  log-verbose "Match found at line $($matchLine.Line) and index $($matchLine.Index) left"
-              }
-            }
-          }
-        }
-        # 4. Right
-        if ($matchLine.index -le $maxIndex) {
-          if(Match-Value -lines $lines -line ($matchLine.Line) -index ($matchLine.Index + 1) -value "M") {
-            if(Match-Value -lines $lines -line ($matchLine.Line) -index ($matchLine.Index + 2) -value "A") {
-              if(Match-Value -lines $lines -line ($matchLine.Line) -index ($matchLine.Index + 3) -value "S") {
-                  $returnValue++
-                  log-verbose "Match found at line $($matchLine.Line) and index $($matchLine.Index) right"
-              }
-            }
-          }
-        }
-        # 5. Up-Left
-        if ($matchLine.line -ge $minLine -and $matchLine.index -ge $minIndex) {
-          if(Match-Value -lines $lines -line ($matchLine.Line - 1) -index ($matchLine.Index - 1) -value "M") {
-            if(Match-Value -lines $lines -line ($matchLine.Line - 2) -index ($matchLine.Index - 2) -value "A") {
-              if(Match-Value -lines $lines -line ($matchLine.Line - 3) -index ($matchLine.Index - 3) -value "S") {
-                  $returnValue++
-                  log-verbose "Match found at line $($matchLine.Line) and index $($matchLine.Index) up-left"
-              }
-            }
-          }
-        }
-        # 6. Up-Right
-        if ($matchLine.line -ge $minLine -and $matchLine.index -le $maxIndex) {
-          if(Match-Value -lines $lines -line ($matchLine.Line - 1) -index ($matchLine.Index + 1) -value "M") {
-            if(Match-Value -lines $lines -line ($matchLine.Line - 2) -index ($matchLine.Index + 2) -value "A") {
-              if(Match-Value -lines $lines -line ($matchLine.Line - 3) -index ($matchLine.Index + 3) -value "S") {
-                  $returnValue++
-                  log-verbose "Match found at line $($matchLine.Line) and index $($matchLine.Index) up-right"
-              }
-            }
-          }
-        }
-        # 7. Down-Left
-        if ($matchLine.line -le $maxLine -and $matchLine.index -ge $minIndex) {
-          if(Match-Value -lines $lines -line ($matchLine.Line + 1) -index ($matchLine.Index - 1) -value "M") {
-            if(Match-Value -lines $lines -line ($matchLine.Line + 2) -index ($matchLine.Index - 2) -value "A") {
-              if(Match-Value -lines $lines -line ($matchLine.Line + 3) -index ($matchLine.Index - 3) -value "S") {
-                  $returnValue++
-                  log-verbose "Match found at line $($matchLine.Line) and index $($matchLine.Index) down-left"
-              }
-            }
-          }
-        }
+        for ($c = 0; $c -lt $line.Length; $c++) {
+          $char = $line[$c]
+          if ($char -eq $firstLetter) {
+            # There are 8 directions to check for:
 
-        # 8. Down-Right
-        if ($matchLine.line -le $maxLine -and $matchLine.index -le $maxIndex) {
-          if(Match-Value -lines $lines -line ($matchLine.Line + 1) -index ($matchLine.Index + 1) -value "M") {
-            if(Match-Value -lines $lines -line ($matchLine.Line + 2) -index ($matchLine.Index + 2) -value "A") {
-              if(Match-Value -lines $lines -line ($matchLine.Line + 3) -index ($matchLine.Index + 3) -value "S") {
-                  $returnValue++
-                  log-verbose "Match found at line $($matchLine.Line) and index $($matchLine.Index) down-right"
-              }
+            # 1. Up
+            if ((Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["up"])) {
+                $returnValue++
+            }
+
+            # 2. Down
+            if ((Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["down"])) {
+                $returnValue++
+            }
+
+            # 3. Left
+            if ((Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["left"])) {
+                $returnValue++
+            }
+
+            # 4. Right
+            if ((Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["right"])) {
+                $returnValue++
+            }
+          
+            # 5. Up-Left
+            if ((Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["up-left"])) {
+                $returnValue++
+            }
+
+            # 6. Up-Right
+            if ((Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["up-right"])) {
+                $returnValue++
+            }
+
+            # 7. Down-Left
+            if ((Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["down-left"])) {
+                $returnValue++
+            }
+
+            # 8. Down-Right
+            if ((Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["down-right"])) {
+                $returnValue++
             }
           }
         }
@@ -165,45 +166,18 @@ begin {
     
     begin {
       $returnValue = 0
-      $beginningSymbol = "X"
-      $lineNumber = 0
-      $lineLength = 0
+      $Word = "XMAS"
       $copyLines = @()
-      $lineMatches = @()
     }
     
     process {
-      $lineMatches += foreach ($line in $lines) {
-        $lineNumber++
-        
-        if (1 -eq $lineNumber) {
-          $lineLength = $line.Length
-        }
-        else {
-          if ($lineLength -ne $line.Length) {
-            throw "Line $($lineNumber) has a different length than the first line ($lineLength)." 
-          }
-        }
-
+      foreach ($line in $lines) {
         $copyLines += $line
-        
-        log-verbose "Line $($lineNumber):" $line
-        $matchesLine = ([regex]$beginningSymbol).Matches($line)
-        #log "Matches:" $matchesLine.count
-        $matchesLine | foreach {
-          $matchLine = $_
-          [PSCustomObject]@{
-            Index = $matchLine.Index
-            Line = $lineNumber
-          } 
-        }
       }
     }
     
     end {
-      $lineMatches | foreach {log-verbose $_.Line $_.Index}
-      log "Found $($lineMatches.Count) matches."
-      $returnValue = Process-Part1 -lines $copyLines -matchLines $lineMatches
+      $returnValue = Process-Part1 -lines $copyLines -word $Word
       return $returnValue
     }
   }
@@ -211,15 +185,77 @@ begin {
   function Process-Part2 {
     [CmdletBinding()]
     param (
-      $line
+      [string[]]
+      $lines,
+      [string]
+      $word
     )
     
     begin {
-      $returnValue = 0
+      $returnValue = @()
+      $firstLetter = $word[0]      
     }
     
     process {
-      
+      #foreach ($line in $lines) {
+      for ($i = 0; $i -lt $lines.Count; $i++) {
+        $line = $lines[$i]
+
+        for ($c = 0; $c -lt $line.Length; $c++) {
+          $char = $line[$c]
+          if ($char -eq $firstLetter) {
+            # There are 8 directions to check for:
+
+            # 1. Up
+            $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["up"])
+            if($val) {
+              $returnValue += $val
+            }
+
+            # 2. Down
+            $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["down"])
+            if($val) {
+              $returnValue += $val
+            }
+  
+            # 3. Left
+            $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["left"])
+            if($val) {
+              $returnValue += $val
+            }
+
+            # 4. Right
+            $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["right"])
+            if($val) {
+              $returnValue += $val
+            }
+          
+            # 5. Up-Left
+            $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["up-left"])
+            if($val) {
+              $returnValue += $val
+            }
+
+            # 6. Up-Right
+            $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["up-right"])
+            if($val) {
+              $returnValue += $val
+            }
+
+            # 7. Down-Left
+            $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["down-left"])
+            if($val) {
+              $returnValue += $val
+            }
+
+            # 8. Down-Right
+            $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["down-right"])
+            if($val) {
+              $returnValue += $val
+            }
+          }
+        }
+      }
     }
     
     end {
@@ -237,15 +273,28 @@ begin {
     
     begin {
       $returnValue = 0
+      $copyLines = @()
+      $calcAvals = @{}
     }
     
     process {
       foreach ($line in $lines) {
-        $returnValue += Process-Part2 -line $line
+        $copyLines += $line
       }
     }
     
     end {
+      $masReturnValue = Process-Part2 -lines $copyLines -word "MAS"
+      $masReturnValue | ForEach-Object {
+        $key = "$($_.StartingLineIndex + $_.LineIndexMove),$($_.StartingCharIndex + $_.CharIndexMove)"
+        if($calcAvals.ContainsKey($key)) {
+          $calcAvals[$key]++
+        }
+        else {
+          $calcAvals[$key] = 1
+        }
+      }
+      $returnValue = ($calcAvals.Values | where {[int]$_ -eq 2}).Count
       return $returnValue
     }
   }
