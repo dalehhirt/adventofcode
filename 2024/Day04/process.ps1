@@ -204,51 +204,26 @@ begin {
         for ($c = 0; $c -lt $line.Length; $c++) {
           $char = $line[$c]
           if ($char -eq $firstLetter) {
-            # There are 8 directions to check for:
-
-            # 1. Up
-            $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["up"])
-            if($val) {
-              $returnValue += $val
-            }
-
-            # 2. Down
-            $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["down"])
-            if($val) {
-              $returnValue += $val
-            }
-  
-            # 3. Left
-            $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["left"])
-            if($val) {
-              $returnValue += $val
-            }
-
-            # 4. Right
-            $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["right"])
-            if($val) {
-              $returnValue += $val
-            }
-          
-            # 5. Up-Left
+            # There are 4 directions to check for:
+            # 1. Up-Left
             $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["up-left"])
             if($val) {
               $returnValue += $val
             }
 
-            # 6. Up-Right
+            # 2. Up-Right
             $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["up-right"])
             if($val) {
               $returnValue += $val
             }
 
-            # 7. Down-Left
+            # 3. Down-Left
             $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["down-left"])
             if($val) {
               $returnValue += $val
             }
 
-            # 8. Down-Right
+            # 4. Down-Right
             $val = (Search-Word -lines $lines -word $word -lineIndex $i -charIndex $c -Direction $points["down-right"])
             if($val) {
               $returnValue += $val
@@ -294,7 +269,10 @@ begin {
           $calcAvals[$key] = 1
         }
       }
-      $returnValue = ($calcAvals.Values | where {[int]$_ -eq 2}).Count
+      $returnValue = ($calcAvals.Values |
+        ForEach-Object {[int]$_} |
+        Where-Object {$_ -ge 2} |
+        Measure-Object).Count
       return $returnValue
     }
   }
