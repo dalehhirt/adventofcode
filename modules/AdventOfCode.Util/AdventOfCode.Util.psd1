@@ -38,7 +38,7 @@
 	# FormatsToProcess = @('xml\AdventOfCode.Util.Format.ps1xml')
 	
 	# Functions to export from this module
-	FunctionsToExport = @('log', 'log-error', 'log-verbose')
+	FunctionsToExport = @('log', 'log-error', 'log-verbose', 'new-statemachine')
 	
 	# Cmdlets to export from this module
 	CmdletsToExport = ''
