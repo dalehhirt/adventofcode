@@ -2,7 +2,7 @@
 .Description
 This script runs.
 .LINK
-<Replace with link to day problem>
+https://adventofcode.com/2024/day/5
 #>
 [CmdletBinding(SupportsShouldProcess=$true)]
 param()
@@ -10,18 +10,46 @@ begin {
   function Process-Part1 {
     [CmdletBinding()]
     param (
-      $line
+      $rules,
+      $updates
     )
     
     begin {
       $returnValue = 0
+      [System.Collections.ArrayList]$validUpdates = @()
     }
     
     process {
-      
+      for ($i = 0; $i -lt $updates.Count; $i++) {
+        $updatesInline = $updates[$i]
+        $validUpdate = $true
+        for ($r = 0; $r -lt $rules.Count; $r++) {
+            $rulesBroken = $rules[$r] -split "\|"
+
+            # check if our update line has both sides of a given rule
+            if (($updatesInline -contains $rulesBroken[0]) -and
+              ($updatesInline -contains $rulesBroken[1])) {
+                $firstIndex = $updatesInline.IndexOf($rulesBroken[0])
+                $secondIndex = $updatesInline.IndexOf($rulesBroken[1])
+                if ($firstIndex -gt $secondIndex) {
+                  $validUpdate = $false
+                }
+            }
+        }
+
+        if ($validUpdate) {
+          log "Valid update:" ($updatesInline -join ",")
+          $validUpdates.Add($updatesInline) | out-null
+        }
+      }
     }
     
     end {
+      $validUpdates | foreach {
+        $validUpdate = $_;
+        $middleValue = [System.Math]::Floor($validUpdate.Count / 2)
+        $returnValue += [int]$validUpdate[$middleValue]
+      }
       return $returnValue
     }
   }
@@ -35,15 +63,26 @@ begin {
     
     begin {
       $returnValue = 0
+      $ruleSeparator = "\|"
+      $updateSeparator = ","
+      [System.Collections.ArrayList]$rules = @()
+      [System.Collections.ArrayList]$updates = @()
     }
     
     process {
       foreach ($line in $lines) {
-        $returnValue += Process-Part1 -line $line
+        if ($line -match $ruleSeparator) {
+          $rules.Add($line) | out-null
+        }
+
+        if ($line -match $updateSeparator) {
+          $updates.Add(($line -split $updateSeparator)) | out-null
+        }
       }
     }
     
     end {
+      $returnValue += Process-Part1 -rules $rules -updates $updates
       return $returnValue
     }
   }
