@@ -38,7 +38,7 @@ begin {
         }
 
         if ($validUpdate) {
-          log "Valid update:" ($updatesInline -join ",")
+          #log "Valid update:" ($updatesInline -join ",")
           $validUpdates.Add($updatesInline) | out-null
         }
       }
@@ -53,6 +53,7 @@ begin {
       return $returnValue
     }
   }
+
   function Get-Part1Answer {
     [CmdletBinding()]
     param (
@@ -87,21 +88,103 @@ begin {
     }
   }
 
+  function Reset-Update {
+    [CmdletBinding()]
+    param (
+      [System.Collections.ArrayList]
+      $rules,
+      [System.Collections.ArrayList]
+      $update
+    )
+    
+    begin {
+      [System.Collections.ArrayList]$returnValue = @()
+    }
+    
+    process {
+      while ($true) {
+        
+        $rulesChanged = 0
+
+        for ($r = 0; $r -lt $rules.Count; $r++) {
+          $rulesBroken = $rules[$r] -split "\|"
+
+          # check if our update line has both sides of a given rule
+          if (($update -contains $rulesBroken[0]) -and
+            ($update -contains $rulesBroken[1])) {
+              $firstIndex = $update.IndexOf($rulesBroken[0])
+              $secondIndex = $update.IndexOf($rulesBroken[1])
+              if ($firstIndex -gt $secondIndex) {
+                $rulesChanged++
+                $update.RemoveAt($firstIndex) | out-null
+                $update.Insert($secondIndex, $rulesBroken[0]) | Out-Null
+              }
+          }
+        }
+
+        if (0 -eq $rulesChanged) {
+          break
+        }
+      }
+    }
+
+    end {
+      return $update
+    }
+  }
+
   function Process-Part2 {
     [CmdletBinding()]
     param (
-      $line
+      $rules,
+      $updates
     )
     
     begin {
       $returnValue = 0
+      $invalidUpdates = @{}
+      [System.Collections.ArrayList]$validUpdates = @()
     }
     
     process {
-      
+      for ($i = 0; $i -lt $updates.Count; $i++) {
+        $updatesInline = $updates[$i]
+        $validUpdate = $true
+        [System.Collections.ArrayList]$brokenRules = @()
+        for ($r = 0; $r -lt $rules.Count; $r++) {
+            $rulesBroken = $rules[$r] -split "\|"
+
+            # check if our update line has both sides of a given rule
+            if (($updatesInline -contains $rulesBroken[0]) -and
+              ($updatesInline -contains $rulesBroken[1])) {
+                $firstIndex = $updatesInline.IndexOf($rulesBroken[0])
+                $secondIndex = $updatesInline.IndexOf($rulesBroken[1])
+                if ($firstIndex -gt $secondIndex) {
+                  $validUpdate = $false
+                }
+            }
+        }
+
+        if (!$validUpdate) {
+          #log "Invalid update:" ($updatesInline -join ",")
+          $invalidUpdates.Add($i, $rules) | out-null
+        }
+      }
+
+      $invalidUpdates.keys | foreach {
+        $newUpdate = (Reset-Update -rules $invalidUpdates[$_] -update $updates[$_].Clone())
+        #log "Now Valid update:" ($newUpdate -join ",")
+        $validUpdates.Add($newUpdate) | out-null
+      }
     }
     
     end {
+      $validUpdates | foreach {
+        #log "Fixed invalid update:" ($updatesInline -join ",")
+        $validUpdate = $_;
+        $middleValue = [System.Math]::Floor($validUpdate.Count / 2)
+        $returnValue += [int]$validUpdate[$middleValue]
+      }
       return $returnValue
     }
   }
@@ -116,15 +199,26 @@ begin {
     
     begin {
       $returnValue = 0
+      $ruleSeparator = "\|"
+      $updateSeparator = ","
+      [System.Collections.ArrayList]$rules = @()
+      [System.Collections.ArrayList]$updates = @()
     }
     
     process {
       foreach ($line in $lines) {
-        $returnValue += Process-Part2 -line $line
+        if ($line -match $ruleSeparator) {
+          $rules.Add($line) | out-null
+        }
+
+        if ($line -match $updateSeparator) {
+          $updates.Add([System.Collections.ArrayList]($line -split $updateSeparator)) | out-null
+        }
       }
     }
     
     end {
+      $returnValue += Process-Part2 -rules $rules -updates $updates
       return $returnValue
     }
   }
