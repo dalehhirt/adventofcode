@@ -61,7 +61,7 @@ begin {
           $ToTest = "$val$operator$($valuesToUse[$valuesToUse.count - 1])"
         
           $returnValue = Invoke-Expression $ToTest
-          log "To Test:" $ToTest $returnValue
+          # log "To Test:" $ToTest $returnValue
           }
       }
     }
@@ -91,13 +91,13 @@ begin {
 
       $operatorsToTry = Get-ArrayOfOperators -count $neededOperators -operatorsToUse $operatorsPart1
 
-      log "Checking:" 
-      log "  line:" $line
+      # log "Checking:" 
+      # log "  line:" $line
       foreach ($operators in $operatorsToTry) {
-        log "  operators:" $operators
+        # log "  operators:" $operators
         $answer = Process-Values -values $lineValues -operators ($operators -split ",")
         if($answer -eq $lineTotal) {
-          log "  Valid"
+          # log "  Valid"
           $returnValue = $answer
           break
         }
@@ -151,13 +151,13 @@ begin {
 
       $operatorsToTry = Get-ArrayOfOperators -count $neededOperators -operatorsToUse $operatorsPart2
 
-      log "Checking:" 
-      log "  line:" $line
+      # log "Checking:" 
+      # log "  line:" $line
       foreach ($operators in $operatorsToTry) {
-        log "  operators:" $operators
+        # log "  operators:" $operators
         $answer = Process-Values -values $lineValues -operators ($operators -split ",")
         if($answer -eq $lineTotal) {
-          log "  Valid"
+          # log "  Valid"
           $returnValue = $answer
           break
         }
