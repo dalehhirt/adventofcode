@@ -196,7 +196,7 @@ begin {
 
   #-----------------
   # Helper functions
-  Import-Module $PSScriptRoot\..\..\modules\AdventOfCode.Util -Force -verbose:$false -DisableNameChecking
+  Import-Module ..\..\modules\AdventOfCode.Util -Force -verbose:$false -DisableNameChecking
 
   #-----------------
   # Global Variables
@@ -204,6 +204,11 @@ begin {
   log-verbose "Input file 1 path: $InputFile1"
   $InputFile2 = Resolve-Path (Join-Path $PSScriptRoot "input2.txt")
   log-verbose "Input file 2 path: $InputFile2"
+
+  $processpart1funcdef = ${function:Process-Part1}.ToString()
+  $processpart2funcdef = ${function:Process-Part2}.ToString()
+  $processvaluesfuncdef = ${function:Process-Values}.ToString()
+  $getarrayofoperatorsfuncdef = ${function:Get-ArrayOfOperators}.ToString()
 }
 process {
   if((get-content $InputFile1) -eq "Placeholder input text file") {
@@ -211,7 +216,20 @@ process {
   }
   else {
     log "Processing Part 1..."
-    log "Part 1 Answer:" (get-content $InputFile1 | Get-Part1Answer)
+    $results = get-content $InputFile1 | ForEach-Object -Parallel {
+      Import-Module ..\..\modules\AdventOfCode.Util -Force -verbose:$false -DisableNameChecking
+      ${function:Process-Part1} = $using:processpart1funcdef
+      ${function:Process-Values} = $using:processvaluesfuncdef
+      ${function:Get-ArrayOfOperators} = $using:getarrayofoperatorsfuncdef
+      $global:operatorsPart1 = $using:operatorsPart1
+
+      write-host "."
+      Process-Part1 -line $_
+    }
+
+    $answer = ($results | Measure-Object -sum).Sum
+
+    log "Part 1 Answer:" $answer
   }
 
   if((get-content $InputFile2) -eq "Placeholder input text file") {
@@ -219,7 +237,20 @@ process {
   }
   else {
     log "Processing Part 2..."
-    log "Part 2 Answer:" (get-content $InputFile2 | Get-Part2Answer)
+    $results = get-content $InputFile2 | ForEach-Object -Parallel {
+      Import-Module ..\..\modules\AdventOfCode.Util -Force -verbose:$false -DisableNameChecking
+      ${function:Process-Part2} = $using:processpart2funcdef
+      ${function:Process-Values} = $using:processvaluesfuncdef
+      ${function:Get-ArrayOfOperators} = $using:getarrayofoperatorsfuncdef
+      $global:operatorsPart2 = $using:operatorsPart2
+
+      write-host "."
+      Process-Part2 -line $_
+    }
+
+    $answer = ($results | Measure-Object -sum).Sum
+
+    log "Part 2 Answer:" $answer
   }
 }
 end {
