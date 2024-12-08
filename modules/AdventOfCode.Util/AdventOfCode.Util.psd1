@@ -38,7 +38,11 @@
 	# FormatsToProcess = @('xml\AdventOfCode.Util.Format.ps1xml')
 	
 	# Functions to export from this module
-	FunctionsToExport = @('log', 'log-error', 'log-verbose', 'new-statemachine')
+	FunctionsToExport = @('log', 
+	'log-error', 
+	'log-verbose', 
+	'new-statemachine',
+	"Get-DeepHashClone")
 	
 	# Cmdlets to export from this module
 	CmdletsToExport = ''
