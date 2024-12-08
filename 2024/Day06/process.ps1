@@ -291,6 +291,8 @@ begin {
     }
   }
 
+  log "Beginning processing year 2024 day 06"
+
   #-----------------
   # Helper functions
   Import-Module $PSScriptRoot\..\..\modules\AdventOfCode.Util -Force -verbose:$false -DisableNameChecking
@@ -320,4 +322,5 @@ process {
   }
 }
 end {
+  log "Ending processing year 2024 day 06"
 }

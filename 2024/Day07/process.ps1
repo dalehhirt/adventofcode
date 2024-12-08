@@ -210,7 +210,7 @@ begin {
     }
   }
 
-  Push-Location $PSScriptRoot
+  log "Beginning processing year 2024 day 07"
 
   #-----------------
   # Helper functions
@@ -245,5 +245,5 @@ process {
   }
 }
 end {
-  Pop-Location
+  log "Ending processing year 2024 day 07"
 }

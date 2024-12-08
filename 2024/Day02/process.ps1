@@ -58,7 +58,7 @@ begin {
         }
       }
     }
-
+    
     end {
       return $returnValue
     }
@@ -112,9 +112,9 @@ begin {
           }
         }
       }
-
+      
     }
-
+    
     end {
       return $returnValue
     }
@@ -142,6 +142,8 @@ begin {
       return $returnValue
     }
   }
+
+  log "Beginning processing year 2024 day 02"
 
   #-----------------
   # Helper functions
@@ -172,4 +174,5 @@ process {
   }
 }
 end {
+  log "Ending processing year 2024 day 02"
 }
