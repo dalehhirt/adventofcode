@@ -60,6 +60,8 @@ begin {
         $nextLine = $currentLine + $directions[$currentDirection].line
         $nextIndex = $currentIndex + $directions[$currentDirection].index
         
+        $stackValue = "[$nextLine][$nextIndex]"
+
         # If current is out of bounds, exit
         if (($nextLine -lt 0) -or 
           ($nextLine -ge $map.Count) -or
@@ -72,6 +74,7 @@ begin {
         # If there is something directly in front of you, turn right 90 degrees.
         if ($map[$nextLine][$nextIndex] -eq $obstacleMarker) {
           $currentDirection = $changeDirections[$currentDirection]
+          #log "Obstacle Marker: $stackValue"
         }
         # Take a step forward
         else {
@@ -134,17 +137,110 @@ begin {
     }
   }
 
-  function Process-Part2 {
+
+  function Process-Part2Answer {
     [CmdletBinding()]
     param (
-      $line
+      $map,
+      $startLine,
+      $startIndex,
+      $startDirection
     )
     
     begin {
       $returnValue = 0
+      $currentDirection = $startDirection
+      $currentLine = $startLine
+      $currentIndex = $startIndex
+      $pathMarker = "X"
+      $obstacleMarker = "#"
+      $stack = New-Object System.Collections.Generic.Stack[string]
     }
     
     process {
+      $stack.Clear()
+      while ($true) {
+        $nextLine = $currentLine + $directions[$currentDirection].line
+        $nextIndex = $currentIndex + $directions[$currentDirection].index
+        
+        # Hitting an obstacle consists of both location and direction
+        $stackValue = "[$nextLine][$nextIndex][$currentDirection]"
+
+        # If current is out of bounds, exit
+        if (($nextLine -lt 0) -or 
+          ($nextLine -ge $map.Count) -or
+          ($nextIndex -lt 0) -or
+          ($nextIndex -ge $map[$nextLine].Count)){
+            $map[$currentLine][$currentIndex] = $pathMarker
+            break
+        }
+
+        # If there is something directly in front of you, turn right 90 degrees.
+        if ($map[$nextLine][$nextIndex] -eq $obstacleMarker) {
+          # if stackvalue (index and direction) already exists
+          # then we are likely in an infinite loop
+          if ($stack.Contains($stackValue)) {
+            $returnValue = 1
+            break
+          }
+
+          $currentDirection = $changeDirections[$currentDirection]
+          $stack.Push($stackValue)
+        }
+        # Take a step forward
+        else {
+          $map[$currentLine][$currentIndex] = $pathMarker
+          $map[$nextLine][$nextIndex] = $currentDirection
+          $currentLine += $directions[$currentDirection].line
+          $currentIndex += $directions[$currentDirection].index
+        }
+      }
+    }
+    
+    end {
+      return $returnValue
+    }
+  }
+
+  function Process-Part2 {
+    [CmdletBinding()]
+    param (
+      $map,
+      $startLine,
+      $startIndex,
+      $startDirection
+    )
+    
+    begin {
+      $mapXindex = $map[0].Count
+      $mapYIndex = $map.Count
+      $returnValue = 0
+    }
+    
+    process {
+      for ($y = 0; $y -lt $mapYIndex; $y++) {
+        for ($x = 0; $x -lt $mapXindex; $x++) {
+          $mapClone = Get-DeepHashClone $map
+          switch ($map[$y][$x]) {
+            "#" { 
+              # Do Nothing as there is already an obstacle there. 
+            }
+            "^" {
+              # Do nothing as this is our starting point.
+            }
+            "." {
+              # Add an obstacle and see if we get into an infinite loop
+              $mapClone[$y][$x] = "#"
+              $processAnswer = Process-Part2Answer -map $mapClone -startLine $startingLine -startIndex $startingIndex -startDirection $startingDirection
+              if($processAnswer) {
+                log "  [$y][$x] IsLoop: $processAnswer"
+              }
+              $returnValue += $processAnswer
+            }
+            Default {}
+          }
+        }
+      }
       
     }
     
@@ -163,15 +259,34 @@ begin {
     
     begin {
       $returnValue = 0
+      $startingLine = 0
+      $startingIndex = 0
+      $startingDirection = ""
+      $map = @{}
+      $lineNumber = 0
     }
     
     process {
       foreach ($line in $lines) {
-        $returnValue += Process-Part2 -line $line
+        $map.Add($lineNumber, [System.Collections.ArrayList]($line -split "" | where {$_ -ne ""})) | out-null
+        $directions.keys | ForEach-Object {
+          $direction = $_
+          for ($j = 0; $j -lt $map[$lineNumber].Count; $j++) {
+            if ($map[$lineNumber][$j] -eq $direction) {
+              $startingLine = $lineNumber
+              $startingIndex = $j
+              $startingDirection = $direction
+              break
+            }
+          }
+        }
+
+        $lineNumber++
       }
     }
     
     end {
+      $returnValue = Process-Part2 -map $map -startLine $startingLine -startIndex $startingIndex -startDirection $startingDirection
       return $returnValue
     }
   }
