@@ -34,7 +34,8 @@ process {
       mkdir $YearPath
     }
     1..25 | ForEach-Object {
-      $DayDirectory = Join-Path $YearPath ("Day{0}" -f $_.ToString("00"))
+      $day = $_.ToString("00")
+      $DayDirectory = Join-Path $YearPath ("Day$day")
 
       if (!(Test-Path $DayDirectory)) {
           log "Initializing $DayDirectory"
@@ -42,7 +43,11 @@ process {
       }
       Init-TextFile -directory $DayDirectory -Force:$Force
 
-      Copy-Item "$PSScriptRoot\template.ps1" "$DayDirectory\process.ps1"
+      #Copy-Item "$PSScriptRoot\template.ps1" "$DayDirectory\process.ps1"
+      Get-Content "$PSScriptRoot\template.ps1" |
+      foreach {$_.replace("<yearNumber>", $Year)} |
+      foreach {$_.replace("<dayNumber>", $day)} |
+        Out-File "$DayDirectory\process.ps1"
     }
 
     Copy-Item "$PSScriptRoot\templateYear.ps1" "$YearPath\runYear.ps1"
