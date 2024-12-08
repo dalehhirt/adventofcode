@@ -5,7 +5,9 @@ This script runs.
 https://adventofcode.com/2024/day/7
 #>
 [CmdletBinding(SupportsShouldProcess=$true)]
-param()
+param(
+  [int]$throttleLimit = 10
+)
 begin {
   $operatorsPart1 = @("*", "+")
   $operatorsPart2 = $operatorsPart1 + @("||")
@@ -91,16 +93,29 @@ begin {
 
       $operatorsToTry = Get-ArrayOfOperators -count $neededOperators -operatorsToUse $operatorsPart1
 
-      # log "Checking:" 
-      # log "  line:" $line
-      foreach ($operators in $operatorsToTry) {
-        # log "  operators:" $operators
-        $answer = Process-Values -values $lineValues -operators ($operators -split ",")
-        if($answer -eq $lineTotal) {
-          # log "  Valid"
-          $returnValue = $answer
-          break
+      $processvaluesfuncdef = ${function:Process-Values}.ToString()
+      $addToMe = [System.Collections.Concurrent.ConcurrentBag[Int64]]::new()
+
+      log "Started ""$($line)""" $operatorsToTry.Count 
+      $operatorsToTry | ForEach-Object -Parallel {
+        ${function:Process-Values} = $using:processvaluesfuncdef
+        $localAddToMe = $using:addToMe
+
+        $operators = $_
+        #log "  operators:" $operators
+        $answer = Process-Values -values $using:lineValues -operators ($operators -split ",")
+
+        $localAddToMe.Add($answer)
+
+        if($answer -eq $using:lineTotal) {
+          return $answer
         }
+      } | Select-Object -First 1 | Out-Null
+
+      log "Finished ""$($line)""" ($operatorsToTry.count -eq $addToMe.Count ? "Tried all $($operatorsToTry.count) permutations" : "Tried $($addToMe.count) of $($operatorsToTry.count) permutations")
+
+      if ($addToMe -contains $lineTotal)  {
+        $returnValue = $lineTotal
       }
     }
     
@@ -151,16 +166,29 @@ begin {
 
       $operatorsToTry = Get-ArrayOfOperators -count $neededOperators -operatorsToUse $operatorsPart2
 
-      # log "Checking:" 
-      # log "  line:" $line
-      foreach ($operators in $operatorsToTry) {
-        # log "  operators:" $operators
-        $answer = Process-Values -values $lineValues -operators ($operators -split ",")
-        if($answer -eq $lineTotal) {
-          # log "  Valid"
-          $returnValue = $answer
-          break
+      $processvaluesfuncdef = ${function:Process-Values}.ToString()
+      $addToMe = [System.Collections.Concurrent.ConcurrentBag[Int64]]::new()
+
+      log "Started ""$($line)""" $operatorsToTry.Count 
+      $operatorsToTry | ForEach-Object -Parallel {
+        ${function:Process-Values} = $using:processvaluesfuncdef
+        $localAddToMe = $using:addToMe
+
+        $operators = $_
+        #log "  operators:" $operators
+        $answer = Process-Values -values $using:lineValues -operators ($operators -split ",")
+
+        $localAddToMe.Add($answer)
+
+        if($answer -eq $using:lineTotal) {
+          return $answer
         }
+      } | Select-Object -First 1 | Out-Null
+
+      log "Finished ""$($line)""" ($operatorsToTry.count -eq $addToMe.Count ? "Tried all $($operatorsToTry.count) permutations" : "Tried $($addToMe.count) of $($operatorsToTry.count) permutations")
+
+      if ($addToMe -contains $lineTotal)  {
+        $returnValue = $lineTotal
       }
     }
     
@@ -216,14 +244,13 @@ process {
   }
   else {
     log "Processing Part 1..."
-    $results = get-content $InputFile1 | ForEach-Object -Parallel {
+    $results = get-content $InputFile1 | ForEach-Object -ThrottleLimit $throttleLimit -Parallel  {
       Import-Module ..\..\modules\AdventOfCode.Util -Force -verbose:$false -DisableNameChecking
       ${function:Process-Part1} = $using:processpart1funcdef
       ${function:Process-Values} = $using:processvaluesfuncdef
       ${function:Get-ArrayOfOperators} = $using:getarrayofoperatorsfuncdef
       $global:operatorsPart1 = $using:operatorsPart1
 
-      write-host "."
       Process-Part1 -line $_
     }
 
@@ -237,14 +264,13 @@ process {
   }
   else {
     log "Processing Part 2..."
-    $results = get-content $InputFile2 | ForEach-Object -Parallel {
+    $results = get-content $InputFile2 | ForEach-Object -ThrottleLimit $throttleLimit -Parallel {
       Import-Module ..\..\modules\AdventOfCode.Util -Force -verbose:$false -DisableNameChecking
       ${function:Process-Part2} = $using:processpart2funcdef
       ${function:Process-Values} = $using:processvaluesfuncdef
       ${function:Get-ArrayOfOperators} = $using:getarrayofoperatorsfuncdef
       $global:operatorsPart2 = $using:operatorsPart2
 
-      write-host "."
       Process-Part2 -line $_
     }
 
