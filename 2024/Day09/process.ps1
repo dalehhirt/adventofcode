@@ -7,10 +7,37 @@ This script runs.
 [CmdletBinding(SupportsShouldProcess=$true)]
 param()
 begin {
+  function Compact-Map () {
+    param(
+      [System.Collections.ArrayList]
+      $map
+    )
+
+    begin {
+      [System.Collections.ArrayList]$newMap = $map.Clone()
+      $newMap.Capacity = $map.Count
+      $space = "."
+    }
+
+    process {
+      for ($i = $newMap.Count - 1; $i -ge 0; $i--) {
+        $firstSpace = $newMap.IndexOf($space)
+        if($newMap[$i] -ne $space -and $i -gt $firstSpace) {
+          $newMap[$firstSpace] = $newMap[$i]
+          $newMap[$i] = $space
+        }
+      }
+    }
+
+    end {
+      return $newMap
+    }
+  }
   function Process-Part1 {
     [CmdletBinding()]
     param (
-      $line
+      $map,
+      $mappingValues
     )
     
     begin {
@@ -18,7 +45,43 @@ begin {
     }
     
     process {
-      
+      $isSpace=$false
+      $mapIndex = 0
+      $mapNumber = 0
+
+      foreach ($value in $mappingValues) {
+        if($value -eq 0) {
+          if($isSpace) {
+            $mapNumber++
+          }
+
+          $isSpace = !$isSpace
+          continue
+        }
+
+        1..$value | foreach {
+          if ($isSpace) {
+            $map[$mapIndex] = "."
+          }
+          else {
+            $map[$mapIndex] = $mapNumber
+          }
+          $mapIndex++
+        }
+
+        if ($isSpace) {
+          $mapNumber++
+        }
+
+        $isSpace = !$isSpace
+      }
+
+      $map = Compact-Map -map $map
+      for($i = 0; $i -lt $map.Count; $i++) {
+        if($map[$i] -ne ".") {
+          $returnValue += ($i * $map[$i])
+        }
+      }
     }
     
     end {
@@ -35,15 +98,21 @@ begin {
     
     begin {
       $returnValue = 0
+      [System.Collections.ArrayList]$map = @()
+      [System.Collections.ArrayList]$mappingValues = @()
     }
     
     process {
       foreach ($line in $lines) {
-        $returnValue += Process-Part1 -line $line
+        $mappingValues = $line -split "" | where {$_ -ne ""}
+        $totalLine = [int64]($mappingValues | measure -sum | select -expand sum)
+        1..$totalLine | foreach {$map.Add(".") | out-null}
+        # $returnValue += Process-Part1 -line $line
       }
     }
     
     end {
+      $returnValue = Process-Part1 -map $map -mappingValues $mappingValues
       return $returnValue
     }
   }
@@ -90,8 +159,6 @@ begin {
     }
   }
 
-  log "Beginning processing year 2024 day 09"
-
   #-----------------
   # Helper functions
   Import-Module $PSScriptRoot\..\..\modules\AdventOfCode.Util -Force -verbose:$false -DisableNameChecking
@@ -121,5 +188,4 @@ process {
   }
 }
 end {
-  log "Ending processing year 2024 day 09"
 }
