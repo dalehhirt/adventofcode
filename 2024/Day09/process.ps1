@@ -7,6 +7,59 @@ This script runs.
 [CmdletBinding(SupportsShouldProcess=$true)]
 param()
 begin {
+  function Compact-MapPart2 () {
+    param(
+      [System.Collections.ArrayList]
+      $map,
+      [int]
+      $maxFileId
+    )
+
+    begin {
+      [System.Collections.ArrayList]$newMap = $map.Clone()
+      $newMap.Capacity = $map.Count
+      $space = "."
+    }
+
+    process {
+      #log "Before:" ($newMap -join "")
+      for ($i = $maxFileId; $i -ge 0; $i--) {
+        #log "Processing file $i"
+        $fileStartIndex = $newMap.IndexOf($i)
+        $fileEndIndex = $newMap.LastIndexOf($i)
+        $fileLength = $fileEndIndex - $fileStartIndex + 1
+
+        $spaceLength = 0
+        $spaceStartIndex = 0
+        for ($j = 0; $j -lt $newMap.Count; $j++) {
+          
+          if($newMap[$j] -eq $space) {
+            if($spaceLength -eq 0) {
+              $spaceStartIndex = $j
+            }
+            $spaceLength++
+          }
+          else {
+            if($spaceLength -ge $fileLength -and $spaceStartIndex -lt $fileStartIndex) {
+              for($k = 0; $k -lt $fileLength; $k++) {
+                $newMap[$spaceStartIndex + $k] = $newMap[$fileStartIndex + $k]
+                $newMap[$fileStartIndex + $k] = $space
+              }
+            }
+
+            $spaceLength = 0
+          }
+        }
+
+        #log ($newMap -join "")
+      }
+    }
+
+    end {
+      return $newMap
+    }
+  }
+
   function Compact-Map () {
     param(
       [System.Collections.ArrayList]
@@ -120,15 +173,56 @@ begin {
   function Process-Part2 {
     [CmdletBinding()]
     param (
-      $line
+      $mappingValues
     )
     
     begin {
       $returnValue = 0
+      $spaces = @{}
+      $fileIds = @{}
+      [System.Collections.ArrayList]$map = @()
     }
     
     process {
-      
+      $isSpace=$false
+      $mapIndex = 0
+      $mapNumber = 0
+
+      foreach ($value in $mappingValues) {
+        if($value -eq 0) {
+          if($isSpace) {
+            $mapNumber++
+          }
+
+          $isSpace = !$isSpace
+          continue
+        }
+
+        1..$value | foreach {
+          if ($isSpace) {
+            $map.Add(".") | out-null
+          }
+          else {
+            $mapNumberString = "$mapNumber"
+            for ($i = 0; $i -lt $mapNumberString.Length; $i++) {
+              $map.add($mapNumberString[$i])
+            }
+          }
+        }
+
+        if ($isSpace) {
+          $mapNumber++
+        }
+
+        $isSpace = !$isSpace
+      }
+
+      $map = Compact-MapPart2 -map $map -maxFileId $mapNumber
+      for($i = 0; $i -lt $map.Count; $i++) {
+        if($map[$i] -ne ".") {
+          $returnValue += ($i * $map[$i])
+        }
+      }
     }
     
     end {
@@ -146,15 +240,17 @@ begin {
     
     begin {
       $returnValue = 0
+      [System.Collections.ArrayList]$mappingValues = @()
     }
     
     process {
       foreach ($line in $lines) {
-        $returnValue += Process-Part2 -line $line
+        $mappingValues = $line -split "" | where {$_ -ne ""}
       }
     }
     
     end {
+      $returnValue = Process-Part2 -mappingValues $mappingValues
       return $returnValue
     }
   }
