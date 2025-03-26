@@ -90,11 +90,11 @@ begin {
     }
   }
 
-  log "Beginning processing year <yearNumber> day <dayNumber>"
-
   #-----------------
   # Helper functions
   Import-Module $PSScriptRoot\..\..\modules\AdventOfCode.Util -Force -verbose:$false -DisableNameChecking
+
+  log "Beginning processing year <yearNumber> day <dayNumber>"
 
   #-----------------
   # Global Variables
